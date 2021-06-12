@@ -16,6 +16,12 @@ if (!channelSecret) {
 addEventListener("fetch", (e) => {
   const { request } = e;
   e.respondWith((async () => {
+    const { pathname } = new URL(e.request.url);
+
+    if (pathname === "/") {
+      return new Response("This is an example LINE bot implementation\nSee https://github.com/kt3k/line-bot-deno-deploy for details");
+    }
+
     const json = await request.text();
     const digest = hmac("sha256", channelSecret, json, "utf8", "base64")
     console.log("body digest", digest);
