@@ -7,19 +7,29 @@ import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 const accessToken = Deno.env.get("ACCESS_TOKEN");
 const channelSecret = Deno.env.get("CHANNEL_SECRET")!;
 
-if (!accessToken) {
-  throw new Error("ACCESS_TOKEN is not set");
-}
-if (!channelSecret) {
-  throw new Error("CHANNEL_SECRET is not set");
-}
 addEventListener("fetch", (e) => {
   const { request } = e;
   e.respondWith((async () => {
     const { pathname } = new URL(e.request.url);
 
     if (pathname === "/") {
-      return new Response("This is an example LINE bot implementation\nSee https://github.com/kt3k/line-bot-deno-deploy for details");
+      return new Response(`This is an example LINE bot implementation
+See https://github.com/kt3k/line-bot-deno-deploy for details
+
+ACCESS_TOKEN: ${accessToken ? "Set ☑️" : "Not set ❌"}
+CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
+`);
+    }
+
+    if (pathname !== "/webhook") {
+      return new Response("404 Not Found", { status: 404 });
+    }
+
+    if (!accessToken) {
+      throw new Error("ACCESS_TOKEN is not set");
+    }
+    if (!channelSecret) {
+      throw new Error("CHANNEL_SECRET is not set");
     }
 
     const json = await request.text();
