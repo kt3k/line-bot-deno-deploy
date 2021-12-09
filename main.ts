@@ -63,11 +63,11 @@ async function webhook(request: Request) {
       messages: [
         {
           type: "text",
-          text: `Hello!`,
+          text: event.events[0].message.text,
         },
         {
           type: "text",
-          text: "Reply from Deno Deploy beta3 using Web Crypto",
+          text: "Reply from Deno Deploy beta3",
         },
       ],
     }),
