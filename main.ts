@@ -2,24 +2,18 @@ import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 import { serve } from "https://deno.land/std@0.117.0/http/server.ts";
 
 const accessToken = Deno.env.get("ACCESS_TOKEN");
-const channelSecret = Deno.env.get("CHANNEL_SECRET")!;
+const channelSecret = Deno.env.get("CHANNEL_SECRET");
 
-serve(async (request) => {
-  const { pathname } = new URL(request.url);
+function indexPage() {
+  return new Response(`This is an example LINE bot implementation
+See https://github.com/kt3k/line-bot-deno-deploy for details`);
+}
 
-  if (pathname === "/") {
-    return new Response(`This is an example LINE bot implementation
-See https://github.com/kt3k/line-bot-deno-deploy for details
+function notFoundPage() {
+  return new Response("404 Not Found", { status: 404 });
+}
 
-ACCESS_TOKEN: ${accessToken ? "Set ☑️" : "Not set ❌"}
-CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
-`);
-  }
-
-  if (pathname !== "/webhook") {
-    return new Response("404 Not Found", { status: 404 });
-  }
-
+async function webhook(request: Request) {
   if (!accessToken) {
     throw new Error("ACCESS_TOKEN is not set");
   }
@@ -29,19 +23,15 @@ CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
 
   const json = await request.text();
   const digest = hmac("sha256", channelSecret, json, "utf8", "base64");
-  console.log("body digest", digest);
   const signature = request.headers.get("x-line-signature");
-  console.log("x-line-signature", signature);
 
   if (digest !== signature) {
-    return new Response("400 Bad Request", { status: 400 });
+    return new Response("Bad Request", { status: 400 });
   }
 
   const event = JSON.parse(json);
-  console.log("event", event);
-
   if (event.events.length === 0) {
-    return new Response("");
+    return new Response("OK");
   }
   const res = await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
@@ -63,6 +53,19 @@ CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
       ],
     }),
   });
-  console.log(await res.json());
-  return new Response("200 OK");
+  await res.arrayBuffer();
+  return new Response("OK");
+}
+
+serve((request) => {
+  const { pathname } = new URL(request.url);
+
+  switch (pathname) {
+    case "/":
+      return indexPage();
+    case "/webhook":
+      return webhook(request);
+    default:
+      return notFoundPage();
+  }
 });
