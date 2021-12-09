@@ -48,6 +48,7 @@ async function webhook(request: Request) {
   }
 
   const event = JSON.parse(json);
+  console.log(event);
   if (event.events.length === 0) {
     return new Response("OK");
   }
