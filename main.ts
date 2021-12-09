@@ -69,7 +69,7 @@ async function webhook(request: Request) {
         },
         {
           type: "text",
-          text: "Reply from Deno Deploy beta3",
+          text: "Reply from Deno Deploy beta3 using Web Crypto",
         },
       ],
     }),
