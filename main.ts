@@ -54,7 +54,7 @@ CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
         },
         {
           type: "text",
-          text: "Reply from Deno Deploy",
+          text: "Reply from Deno Deploy beta3",
         },
       ],
     }),
