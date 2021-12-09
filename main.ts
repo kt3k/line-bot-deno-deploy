@@ -1,4 +1,3 @@
-import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 import { serve } from "https://deno.land/std@0.117.0/http/server.ts";
 
 const accessToken = Deno.env.get("ACCESS_TOKEN");
@@ -13,6 +12,25 @@ function notFoundPage() {
   return new Response("404 Not Found", { status: 404 });
 }
 
+const enc = new TextEncoder();
+const algorithm = { name: "HMAC", hash: "SHA-256" };
+
+async function hmac(secret: string, body: string) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    algorithm,
+    false,
+    ["sign", "verify"],
+  );
+  const signature = await crypto.subtle.sign(
+    algorithm.name,
+    key,
+    enc.encode(body),
+  );
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
 async function webhook(request: Request) {
   if (!accessToken) {
     throw new Error("ACCESS_TOKEN is not set");
@@ -24,7 +42,7 @@ async function webhook(request: Request) {
   const json = await request.text();
   console.log("json", json);
   console.log("channelSecret", channelSecret);
-  const digest = hmac("sha256", channelSecret, json, "utf8", "base64");
+  const digest = await hmac(channelSecret, json);
   console.log("digest", digest);
   const signature = request.headers.get("x-line-signature");
 
