@@ -22,7 +22,10 @@ async function webhook(request: Request) {
   }
 
   const json = await request.text();
+  console.log("json", json);
+  console.log("channelSecret", channelSecret);
   const digest = hmac("sha256", channelSecret, json, "utf8", "base64");
+  console.log("digest", digest);
   const signature = request.headers.get("x-line-signature");
 
   if (digest !== signature) {
