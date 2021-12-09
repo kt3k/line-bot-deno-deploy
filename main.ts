@@ -38,7 +38,11 @@ CHANNEL_SECRET: ${channelSecret ? "Set ☑️" : "Not set ❌"}
   }
 
   const event = JSON.parse(json);
-  console.log(event);
+  console.log("event", event);
+
+  if (event.events.length === 0) {
+    return new Response("");
+  }
   const res = await fetch("https://api.line.me/v2/bot/message/reply", {
     method: "POST",
     headers: {
