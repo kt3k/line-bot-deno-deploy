@@ -1,2 +1,7 @@
+.PHONY: dev
 dev:
-	deployctl run --libs="" main.ts
+	deno run -A main.ts
+
+.PHONY: fmt
+fmt:
+	deno fmt
